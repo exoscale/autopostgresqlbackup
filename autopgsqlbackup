@@ -340,7 +340,7 @@ fi
 
 # If backing up all DBs on the server
 if [ "$DBNAMES" = "all" ]; then
-	DBNAMES="`psql -U $USERNAME $HOST -l -A -F: | sed -ne "/:/ { /Name:Owner/d; /template0/d; s/:.*$//; p }"`"
+  DBNAMES="`psql -U $USERNAME $HOST postgres -A -q -t -c "SELECT datname FROM pg_database where datistemplate = false"`"
 
 	# If DBs are excluded
 	for exclude in $DBEXCLUDE
