@@ -378,16 +378,16 @@ echo ======================================================================
 				mkdir -p "$BACKUPDIR/monthly/$MDB"
 			fi
 			echo Monthly Backup of $MDB...
-      echo
-      echo Rotating 13 months Backups...
-        if [ "$MO" -le 01 ];then
-          REMM=12
-        else
-          REMM=`printf "%02d" $(expr $MO - 1)`
-        fi
-        REMY=`expr $Y - 1`
-      eval rm -fv "$BACKUPDIR/monthly/$MDB/${MDB}_$REMY-$REMM-*"
-      echo
+                        echo
+                        echo Rotating 13 months Backups...
+                          if [ "$MO" -le 01 ];then
+                            REMM=12
+                          else
+                            REMM=`printf "%02d" $(expr $MO - 1)`
+                          fi
+                          REMY=`expr $Y - 1`
+                        eval rm -fv "$BACKUPDIR/monthly/$MDB/${MDB}_$REMY-$REMM-*"
+                        echo
 				dbdump "$MDB" "$BACKUPDIR/monthly/$MDB/${MDB}_$DATE.$M.$MDB.sql"
 				compression "$BACKUPDIR/monthly/$MDB/${MDB}_$DATE.$M.$MDB.sql"
 				BACKUPFILES="$BACKUPFILES $BACKUPDIR/monthly/$MDB/${MDB}_$DATE.$M.$MDB.sql$SUFFIX"
@@ -451,16 +451,16 @@ echo ======================================================================
 	# Monthly Full Backup of all Databases
 	if [ $DOM = "01" ]; then
 		echo Monthly full Backup of \( $MDBNAMES \)...
-    echo
-    echo Rotating 13 months Backups...
-      if [ "$MO" -eq 01 ];then
-        REMM=12
-      else
-        REMM=`printf "%02d" $(expr $MO - 1)`
-      fi
-      REMY=`expr $Y - 1`
-    eval rm -fv "$BACKUPDIR/monthly/$MDB/${MDB}_$REMY-$REMM-*"
-    echo
+                echo
+                echo Rotating 13 months Backups...
+                  if [ "$MO" -eq 01 ];then
+                    REMM=12
+                  else
+                    REMM=`printf "%02d" $(expr $MO - 1)`
+                  fi
+                  REMY=`expr $Y - 1`
+                eval rm -fv "$BACKUPDIR/monthly/$MDB/${MDB}_$REMY-$REMM-*"
+                echo
 			dbdump "$MDBNAMES" "$BACKUPDIR/monthly/$DATE.$M.all-databases.sql"
 			compression "$BACKUPDIR/monthly/$DATE.$M.all-databases.sql"
 			BACKUPFILES="$BACKUPFILES $BACKUPDIR/monthly/$DATE.$M.all-databases.sql$SUFFIX"
