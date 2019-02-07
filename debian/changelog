@@ -3,3 +3,11 @@ exoscale-autopgsqlbackup (1.1-1) unstable; urgency=medium
   * Initial release.
 
  -- Exoscale <ops@exoscale.ch>  Tue, 26 Dec 2017 10:00:00 +0000
+
+ exoscale-autopgsqlbackup (1.2-0) unstable; urgency=medium
+
+   * Update list all databases command
+   * Add 13 months cycle rotation for monthly backups
+   * Fix weekly backups rotation
+
+  -- Exoscale <ops@exoscale.ch>  Thu, 7 Feb 2019 17:10:58 +0000
