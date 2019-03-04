@@ -185,9 +185,7 @@ COMP=bzip2
 # cron.daily scripts are run...Can be changed with DOWEEKLY setting..
 # Weekly Backups are rotated on a 5 week cycle..
 # Monthly Backups are run on the 1st of the month..
-# Monthly Backups are NOT rotated automatically...
-# It may be a good idea to copy Monthly backups offline or to another
-# server..
+# Monthly Backups are rotated on a 13 months cycle..
 #
 #=====================================================================
 # Please Note!!
@@ -209,7 +207,10 @@ COMP=bzip2
 #   Initial Release - based on AutoMySQLBackup 2.2
 # VER 1.1 - (2017-12-26)
 #   Add config file parameter - based on AutoMySQLBackup 3.0
-#
+# VER 1.2 - (2019-02-06)
+#   Update list all databases command
+#   Add 13 months cycle rotation for monthly backups
+#   Fix weekly backups rotation
 #=====================================================================
 #=====================================================================
 #
@@ -218,13 +219,15 @@ COMP=bzip2
 #=====================================================================
 #=====================================================================
 PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/postgres/bin:/usr/local/pgsql/bin
-DATE=`date +%Y-%m-%d`				# Datestamp e.g 2002-09-21
+DATE=`date +%Y-%m-%d`		# Datestamp e.g 2002-09-21
 DOW=`date +%A`					# Day of the week e.g. Monday
 DNOW=`date +%u`					# Day number of the week 1 to 7 where 1 represents Monday
 DOM=`date +%d`					# Date of the Month e.g. 27
-M=`date +%B`					# Month e.g January
-W=`date +%V`					# Week Number e.g 37
-VER=1.0						# Version Number
+M=`date +%B`			  		# Month e.g January
+W=`date +%V`				  	# Week Number e.g 37
+Y=`date +%Y`					  # Year e.g 2019
+MO=`date +%m`           # Month number e.g 01
+VER=1.2						      # Version Number
 NO_ARGS=0
 
 if (( $# == $NO_ARGS )); then   # Script invoked with no command-line args?
@@ -340,7 +343,7 @@ fi
 
 # If backing up all DBs on the server
 if [ "$DBNAMES" = "all" ]; then
-	DBNAMES="`psql -U $USERNAME $HOST -l -A -F: | sed -ne "/:/ { /Name:Owner/d; /template0/d; s/:.*$//; p }"`"
+  DBNAMES="`psql -U $USERNAME $HOST postgres -A -q -t -c "SELECT datname FROM pg_database where datistemplate = false"`"
 
 	# If DBs are excluded
 	for exclude in $DBEXCLUDE
@@ -375,6 +378,16 @@ echo ======================================================================
 				mkdir -p "$BACKUPDIR/monthly/$MDB"
 			fi
 			echo Monthly Backup of $MDB...
+                        echo
+                        echo Rotating 13 months Backups...
+                          if [ "$MO" -le 01 ];then
+                            REMM=12
+                          else
+                            REMM=`printf "%02d" $(expr $MO - 1)`
+                          fi
+                          REMY=`expr $Y - 1`
+                        eval rm -fv "$BACKUPDIR/monthly/$MDB/${MDB}_$REMY-$REMM-*"
+                        echo
 				dbdump "$MDB" "$BACKUPDIR/monthly/$MDB/${MDB}_$DATE.$M.$MDB.sql"
 				compression "$BACKUPDIR/monthly/$MDB/${MDB}_$DATE.$M.$MDB.sql"
 				BACKUPFILES="$BACKUPFILES $BACKUPDIR/monthly/$MDB/${MDB}_$DATE.$M.$MDB.sql$SUFFIX"
@@ -409,7 +422,7 @@ echo ======================================================================
 			else
 				REMW=`expr $W - 5`
 			fi
-		eval rm -fv "$BACKUPDIR/weekly/$DB/week.$REMW.*"
+		eval rm -fv "$BACKUPDIR/weekly/$DB/${DB}_week.$REMW.*"
 		echo
 			dbdump "$DB" "$BACKUPDIR/weekly/$DB/${DB}_week.$W.$DATE.sql"
 			compression "$BACKUPDIR/weekly/$DB/${DB}_week.$W.$DATE.sql"
@@ -438,6 +451,16 @@ echo ======================================================================
 	# Monthly Full Backup of all Databases
 	if [ $DOM = "01" ]; then
 		echo Monthly full Backup of \( $MDBNAMES \)...
+                echo
+                echo Rotating 13 months Backups...
+                  if [ "$MO" -eq 01 ];then
+                    REMM=12
+                  else
+                    REMM=`printf "%02d" $(expr $MO - 1)`
+                  fi
+                  REMY=`expr $Y - 1`
+                eval rm -fv "$BACKUPDIR/monthly/$MDB/${MDB}_$REMY-$REMM-*"
+                echo
 			dbdump "$MDBNAMES" "$BACKUPDIR/monthly/$DATE.$M.all-databases.sql"
 			compression "$BACKUPDIR/monthly/$DATE.$M.all-databases.sql"
 			BACKUPFILES="$BACKUPFILES $BACKUPDIR/monthly/$DATE.$M.all-databases.sql$SUFFIX"
