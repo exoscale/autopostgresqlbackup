@@ -42,6 +42,7 @@ USERNAME=postgres
 
 # Host name (or IP address) of PostgreSQL server e.g localhost
 DBHOST=localhost
+DBPORT=5432
 
 # List of DBNAMES for Daily/Weekly Backup e.g. "DB1 DB2 DB3"
 DBNAMES="all"
@@ -285,7 +286,7 @@ exec > $LOGFILE     # stdout replaced with file $LOGFILE.
 
 # Database dump function
 dbdump () {
-pg_dump --username=$USERNAME $HOST $OPT $1 > $2
+pg_dump --username=$USERNAME $HOST -p $DBPORT $OPT $1 > $2
 return 0
 }
 
@@ -343,7 +344,7 @@ fi
 
 # If backing up all DBs on the server
 if [ "$DBNAMES" = "all" ]; then
-  DBNAMES="`psql -U $USERNAME $HOST postgres -A -q -t -c "SELECT datname FROM pg_database where datistemplate = false"`"
+  DBNAMES="`psql -U $USERNAME $HOST -p $DBPORT postgres -A -q -t -c "SELECT datname FROM pg_database where datistemplate = false"`"
 
 	# If DBs are excluded
 	for exclude in $DBEXCLUDE
